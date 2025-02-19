@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot</title>
+    <title>Virtual Doctor</title>
     <style>
         /* Variables for Light and Dark Mode */
         :root {
@@ -428,7 +428,7 @@
         });
 
         // Replace with your actual Google Cloud Function URL
-        const CLOUD_FUNCTION_URL = "https://us-central1-casual-ypeq.cloudfunctions.net/dialogflowHandler";
+        const CLOUD_FUNCTION_URL = "https://dialogflowhandler-667713204131.us-central1.run.app";
 
         // Send message to Cloud Function and display response
         async function sendMessage() {
@@ -497,7 +497,7 @@
             // If bot, add an icon
             if (sender === "bot") {
                 const botIcon = document.createElement("img");
-                botIcon.src = "https://i.imgur.com/XjBpxoP.jpeg"; // Make sure the path matches
+                botIcon.src = "data:image/png;base64,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"; // Make sure the path matches
                 botIcon.alt = "Virtual Doctor";
                 botIcon.classList.add("bot-icon");
                 containerDiv.appendChild(botIcon);
