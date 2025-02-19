@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        /* Variables for Light and Dark Mode */
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --menu-bg: #ffffff;
+            --menu-text: #000000;
+            --bot-bg: #e9ecef;
+            --user-bg: #007bff;
+            --button-bg: #ffffff;
+            --button-text: #000000;
+            --button-hover: #dddddd;
+        }
+
+        .dark-mode {
+            --bg-color: #2C2F33;
+            --text-color: #E0E0E0;
+            --menu-bg: #3B3E42;
+            --menu-text: #E0E0E0;
+            --bot-bg: #3B3E42;
+            --user-bg: #4E8EF7;
+            --button-bg: #4E8EF7;
+            --button-text: #ffffff;
+            --button-hover: #3A6EC1;
+        }
+
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #menu {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background: var(--menu-bg);
+            color: var(--menu-text);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+
+       /* Align Menu Button and Chatbot Name */
+        #header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+        }
+
+        /* Menu Button Styling */
+        #menu-button {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center; /* Centers the icon inside */
+            justify-content: center;
+            height: 40px; /* Fixed height */
+        }
+
+        /* Align Chatbot Name to the Right of Menu Button */
+        #chatbot-name {
+            font-size: 20px; /* Keep the same size */
+            font-weight: bold;
+            margin-left: 10px; /* Adjust spacing from menu button */
+            display: flex;
+            align-items: center; /* Ensures vertical alignment */
+            height: 40px; /* Match menu button height */
+            line-height: 40px; /* Ensures vertical alignment */
+            margin-top: 12px; /* Move text down slightly */
+        }
+
+        #menu-button:hover {
+            background: var(--button-hover);
+        }
+
+        #menu select, #menu button, #menu label {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        #chat-container {
+            width: 90%;
+            max-width: 1300px;
+            background: var(--bg-color);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: none; /* Removes the shadow */
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+
+        /* Chatbot Name Styling */
+        #chatbot-name {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #messages {
+            flex-grow: 1;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+            overflow-y: auto; /* Allow vertical scrolling if needed */
+            border-bottom: 1px solid var(--bot-bg);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Reduce vertical spacing between messages */
+        }
+
+        /* Ensure each message has its own row */
+        .message-container {
+            display: flex;
+            width: 100%;
+            align-items: flex-start; /* Keep messages aligned at the top */
+        }
+
+        /* User messages on the right */
+        .message-container.user {
+            justify-content: flex-end;
+            padding-left: .5%; /* Pushes user messages to the right */
+        }
+
+        /* Bot messages on the left */
+        .message-container.bot {
+            justify-content: flex-start;
+            padding-right: .5%; /* Pushes bot messages to the left */
+        }
+
+        /* Chatbot Icon */
+        .bot-icon {
+            width: 40px; /* Adjust icon size */
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* Chat Message Bubbles */
+        .message {
+            padding: 6px 10px;
+            border-radius: 12px;
+            max-width: 60%;
+            word-wrap: break-word;
+            display: inline-block;
+            font-size: 15px; /* Reduce font size slightly to fit more */
+            line-height: 1.3; /* Reduce line height for compact text */
+        }
+
+        /* User message styles */
+        .user .message {
+            background-color: var(--user-bg);
+            color: white;
+            border-top-right-radius: 2px;
+        }
+
+        /* Bot message styles */
+        .bot .message {
+            background-color: var(--bot-bg);
+            color: var(--text-color);
+            border-top-left-radius: 2px;
+        }
+
+
+        #input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Space between suggestions and input field */
+            width: 100%;
+        }
+
+        /* Ensure the input field and button are properly aligned */
+        #input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        /* Input field */
+        #user-input {
+            flex: 1; /* Makes input take remaining space */
+            padding: 12px;
+            border: 2px solid var(--bot-bg);
+            border-radius: 5px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+            font-size: 16px;
+            width: 90%; /* Make it shorter */
+            min-width: 300px;
+        }
+
+        /* Send button (smaller and next to input) */
+        #send-button {
+            width: 50px; /* Smaller button */
+            height: 50px;
+            background: var(--button-bg);
+            border: none;
+            border-radius: 50%; /* Makes it round */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Paper airplane icon */
+        #send-button img {
+            width: 23px; /* Icon size */
+            height: 23px;
+        }
+
+        #suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
+            justify-content: flex-start; /* Left-aligned the suggestions */
+            margin-bottom: 5px; /* Add some space between suggestions and input field */
+        }
+
+        .suggestion {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: 1px solid var(--text-color);
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            white-space: nowrap; /* Prevents wrapping within individual buttons */
+        }
+
+        .suggestion:hover {
+            background: var(--button-hover);
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--bot-bg);
+            border-radius: 5px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        button {
+            padding: 10px;
+            margin-left: 5px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: 2px solid var(--text-color);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: var(--button-hover);
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <button id="menu-button">☰</button>
+        <span id="chatbot-name">Virtual Doctor</span>
+    </div>
+    
+    <div id="menu">
+        <h3>Settings</h3>
+
+        <label for="topics">Select Topic:</label>
+        <select id="topics">
+            <option value="topic1">Select a Topic</option>
+            <option value="topic2">Heart Attack</option>
+            <option value="topic3">Hepatitis C</option>
+            <option value="topic4">Cancer</option>
+            <option value="topic5">Hypothyroidism</option>
+        </select>
+
+        <label>
+            <input type="checkbox" id="theme-toggle">
+            Toggle Day/Night Mode
+        </label>
+
+        <button id="refresh">Refresh Chat</button>
+    </div>
+
+    <div id="chat-container">
+        <div id="messages"></div>
+        <div id="input-area">
+            <div id="suggestions"></div>
+            <div id="input-wrapper">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button id="send-button">
+                    <img src="https://cdn3.iconfinder.com/data/icons/infinity-ink-office/48/005_090_paper_plane_send_message-1024.png" alt="Send">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const topicSuggestions = {
+            topic1: [],
+            topic2: ["What Is a Heart Attack?", "What are the symptoms of a heart attack?", "What is the most common cause of a heart attack?", "What are the risk factors for heart attacks?","What are some ways to prevent heart attacks?"],
+            topic3: ["What is Hepatitis C?", "How is Hepatitis C Spread?", "What Are the Symptoms of Hepatitis C?","What Other Problems Can Hepatitis C Cause?","What Are the Treatments for Hepatitis C?"],
+            topic4: ["What kinds of cancer are more common in young adults?", "Are there ways to prevent breast cancer?", "How do I know if something on my skin might be melanoma?","How do doctors treat cancer?","What’s the difference between chemotherapy and radiotherapy?"],
+            topic5: ["What is Hypothyroidism?", "What causes hypothyroidism?", "What are the symptoms of hypothyroidism?", "What other problems can hypothyroidism cause?","What are the treatments for hypothyroidism?"],
+        };
+
+        const availableSuggestions = {};
+        const topicsDropdown = document.getElementById("topics");
+        const suggestionsDiv = document.getElementById("suggestions");
+        const userInput = document.getElementById("user-input");
+
+        // Initialize available suggestions
+        function resetSuggestions() {
+            for (let topic in topicSuggestions) {
+                // availableSuggestions[topic] = [...topicSuggestions[topic]];
+                availableSuggestions[topic] = 0; //start at the first suggestion
+            }
+        }
+        resetSuggestions();
+
+        // Display one random suggestion at a time
+        /*function displayRandomSuggestion(topic) {
+            const suggestions = availableSuggestions[topic];
+            if (!suggestions || suggestions.length === 0) {
+                suggestionsDiv.innerHTML = ""; // Clear if no suggestions are left
+                return;
+            }
+
+            let filteredSuggestions = suggestions.filter(q => q !== userInput.value); // Remove the one in the text box
+
+            // If all available suggestions match the input, return any remaining one
+            if (filteredSuggestions.length === 0) {
+                filteredSuggestions = suggestions;
+            }
+
+            const randomIndex = Math.floor(Math.random() * filteredSuggestions.length);
+            const suggestionText = filteredSuggestions[randomIndex];
+
+            suggestionsDiv.innerHTML = ""; // Clear existing suggestion
+            const suggestion = document.createElement("div");
+            suggestion.className = "suggestion";
+            suggestion.textContent = suggestionText;
+            suggestion.addEventListener("click", () => {
+                userInput.value = suggestionText; // Fill input box
+                displayRandomSuggestion(topic); // Generate a new suggestion
+            });
+            suggestionsDiv.appendChild(suggestion);
+        }*/
+
+        // display next suggestion
+        function displayNextSuggestion(topic) {
+            const suggestions = topicSuggestions[topic];
+            if (!suggestions || suggestions.length === 0) {
+                suggestionsDiv.innerHTML = ""; // Clear if no suggestions
+                return;
+            }
+
+            // Get the next suggestion in order
+            let index = availableSuggestions[topic] % suggestions.length;
+            const suggestionText = suggestions[index];
+
+            // Increment index for next time
+            availableSuggestions[topic]++;
+
+            // Display the suggestion
+            suggestionsDiv.innerHTML = ""; // Clear existing suggestion
+            const suggestion = document.createElement("div");
+            suggestion.className = "suggestion";
+            suggestion.textContent = suggestionText;
+            suggestion.addEventListener("click", () => {
+                userInput.value = suggestionText; // Fill input box
+                displayNextSuggestion(topic); // Show the next one in sequence
+            });
+            suggestionsDiv.appendChild(suggestion);
+        }
+
+
+        // Handle topic selection
+        topicsDropdown.addEventListener("change", () => {
+            const selectedTopic = topicsDropdown.value;
+            // displayRandomSuggestion(selectedTopic);
+            displayNextSuggestion(selectedTopic);
+        });
+
+        // Refresh Chat and Reset Suggestions
+        document.getElementById("refresh").addEventListener("click", () => {
+            document.getElementById("messages").innerHTML = "";
+            resetSuggestions(); // Reset all suggestions
+            suggestionsDiv.innerHTML = ""; // Clear suggestions
+        });
+
+        // Send message logic
+        document.getElementById("send-button").addEventListener("click", sendMessage);
+        document.getElementById("user-input").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        // Replace with your actual Google Cloud Function URL
+        const CLOUD_FUNCTION_URL = "https://us-central1-casual-ypeq.cloudfunctions.net/dialogflowHandler";
+
+        // Send message to Cloud Function and display response
+        async function sendMessage() {
+            const message = document.getElementById("user-input").value.trim();
+            if (!message) return;
+
+            addMessage(message, "user"); // Show user message
+            document.getElementById("user-input").value = ""; // Clear input field
+
+            try {
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        sessionId: "test-session", // Unique session per user
+                        message: message
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server response was not OK");
+                }
+
+                const data = await response.json();
+
+                console.log("Raw Dialogflow Response:", data); // 👈 Logs raw output to browser console
+
+                //if (data.reply) {
+                    //addMessage(data.reply, "bot"); // Display bot response
+                //} else {
+                    //addMessage("⚠️ Error: No response from bot.", "bot");
+                //}
+                if (data.richText) {
+                    addMessage(data.richText, "bot"); // ✅ Use rich text if available
+                } else {
+                    addMessage(data.reply, "bot"); // Fallback to plain text
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                addMessage("⚠️ Error: Unable to connect to the server.", "bot");
+            }
+
+            const selectedTopic = topicsDropdown.value;
+            const suggestions = availableSuggestions[selectedTopic];
+
+            // Remove only the exact sent message from the array
+            if (suggestions) {
+                const index = suggestions.indexOf(message);
+                if (index > -1) {
+                    suggestions.splice(index, 1);
+                }
+            }
+
+            userInput.value = ""; // Clear input field
+            // displayRandomSuggestion(selectedTopic); // Display next random suggestion
+            displayNextSuggestion(selectedTopic); // Display next suggestion in sequence
+        }
+
+        function addMessage(text, sender) {
+            const messageContainer = document.getElementById("messages");
+            const containerDiv = document.createElement("div"); // New wrapper for messages
+            containerDiv.classList.add("message-container", sender);
+
+            // If bot, add an icon
+            if (sender === "bot") {
+                const botIcon = document.createElement("img");
+                botIcon.src = "https://i.imgur.com/XjBpxoP.jpeg"; // Make sure the path matches
+                botIcon.alt = "Virtual Doctor";
+                botIcon.classList.add("bot-icon");
+                containerDiv.appendChild(botIcon);
+            }
+
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", sender);
+            //messageDiv.textContent = ""; // Ensure it's empty at the start
+            containerDiv.appendChild(messageDiv);
+            messageContainer.appendChild(containerDiv);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+            if (sender === "bot") {
+                let index = 0;
+                function typeEffect() {
+                    if (index < text.length) {
+                        //messageDiv.textContent += text.charAt(index);
+                        messageDiv.innerHTML = text.substring(0, index + 1).replace(/\n/g, "<br>");;
+                        index++;
+                        setTimeout(typeEffect, 20); // Adjust speed (lower is faster)
+                        scrollToBottom(); // Ensure scrolling happens smoothly
+                    }
+                }
+                setTimeout(typeEffect, 30); // Start typing effect immediately
+            } else {
+                //messageDiv.textContent = text; // Instant display for user messages
+                messageDiv.innerHTML = text.replace(/\n/g, "<br>");;
+                scrollToBottom(); // Ensure scrolling happens smoothly
+            }
+
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        // Function to auto-scroll the chat to the latest message
+        function scrollToBottom() {
+            const messageContainer = document.getElementById("messages");
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        // Toggle menu visibility
+        const menuButton = document.getElementById("menu-button");
+        const menu = document.getElementById("menu");
+
+        menuButton.addEventListener("click", (event) => {
+            event.stopPropagation(); // Prevent click event from closing the menu immediately
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        // Close menu if clicking anywhere outside of it
+        document.addEventListener("click", (event) => {
+            if (menu.style.display === "block" && !menu.contains(event.target) && event.target !== menuButton) {
+                menu.style.display = "none";
+            }
+        });
+
+        // Toggle Day/Night mode
+        const themeToggle = document.getElementById("theme-toggle");
+        themeToggle.addEventListener("change", () => {
+            document.body.classList.toggle("dark-mode");
+            localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+        });
+
+        // Load saved theme preference
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-mode");
+            themeToggle.checked = true;
+        }
+    </script>
+</body>
+</html>
