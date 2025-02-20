@@ -341,6 +341,11 @@
         const suggestionsDiv = document.getElementById("suggestions");
         const userInput = document.getElementById("user-input");
 
+        function initializeChat() {
+            document.getElementById("messages").innerHTML = ""; // Clear chat
+            addMessage("Greetings. I am Virtual Doctor, your dedicated health assistant. My role is to provide clear, reliable health information to help you stay informed. How can I assist you today?", "bot"); // Initial message
+        }
+        
         // Initialize available suggestions
         function resetSuggestions() {
             for (let topic in topicSuggestions) {
@@ -349,7 +354,7 @@
             }
         }
         resetSuggestions();
-
+        initializeChat(); // ✅ Show initial chatbot message when page loads
         // Display one random suggestion at a time
         /*function displayRandomSuggestion(topic) {
             const suggestions = availableSuggestions[topic];
@@ -416,9 +421,9 @@
 
         // Refresh Chat and Reset Suggestions
         document.getElementById("refresh").addEventListener("click", () => {
-            document.getElementById("messages").innerHTML = "";
             resetSuggestions(); // Reset all suggestions
             suggestionsDiv.innerHTML = ""; // Clear suggestions
+            initializeChat(); // ✅ Restart chat with initial message
         });
 
         // Send message logic
