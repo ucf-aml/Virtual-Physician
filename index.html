@@ -351,6 +351,7 @@
             for (let topic in topicSuggestions) {
                 // availableSuggestions[topic] = [...topicSuggestions[topic]];
                 availableSuggestions[topic] = 0; //start at the first suggestion
+                topicSuggestions[topic] = [...topicSuggestions[topic]];
             }
         }
         resetSuggestions();
@@ -401,14 +402,16 @@
 
             // Display the suggestion
             suggestionsDiv.innerHTML = ""; // Clear existing suggestion
-            const suggestion = document.createElement("div");
-            suggestion.className = "suggestion";
-            suggestion.textContent = suggestionText;
-            suggestion.addEventListener("click", () => {
-                userInput.value = suggestionText; // Fill input box
-                displayNextSuggestion(topic); // Show the next one in sequence
-            });
-            suggestionsDiv.appendChild(suggestion);
+            if (suggestions.length > 0) {
+                const suggestion = document.createElement("div");
+                suggestion.className = "suggestion";
+                suggestion.textContent = suggestionText;
+                suggestion.addEventListener("click", () => {
+                    userInput.value = suggestionText; // Fill input box
+                    displayNextSuggestion(topic); // Show the next one in sequence
+                });
+                suggestionsDiv.appendChild(suggestion);
+            }
         }
 
 
@@ -479,7 +482,7 @@
             }
 
             const selectedTopic = topicsDropdown.value;
-            const suggestions = availableSuggestions[selectedTopic];
+            const suggestions = topicSuggestions[selectedTopic];
 
             // Remove only the exact sent message from the array
             if (suggestions) {
